@@ -5,7 +5,7 @@
 #define nulo -1;
 
 typedef struct cabeca{
-    int rrn;
+    int rrnraiz;
 } cabecalho;
 
 typedef struct pag{
@@ -104,12 +104,102 @@ void divide(int chave, int filho_d, pagina *p, int *chavepromo, int *filho_d_pro
 	*filho_d_pro = rrn_novo(arvoreb);
 }
 
+int insere(int rrn, int chave, int *chavepromo, int *filho_d_pro, FILE *arvoreb){
+    pagina p, novap;
+    int chavepro, rrnpromo, pos, retorno;
+    if(rrn == nulo){
+        *chavepromo = chave;
+        *filho_d_pro = nulo;
+        return promo;
+    }
+    ler_pag(rrn, &p, arvoreb);
+    pos = pos_chaves(chave, p.chaves, p.qntchave);
+    if(pos < p.qntchaves && p.chaves[pos] == chave){
+        return erro;
+    }
+    retorno = insere(p.filhos[pos], chave, &chavepro, &rrnpromo, arvoreb);
+    if(retorno == sem_promo || retorno = erro){
+        return retorno;
+    }
+    else{
+        if(p.qntchave < ordem - 1){
+            insere_chave_promo(chavepro, rrnpromo, p.chaves, p.filhos, &(p.qntchave));
+            escreve_pag(rrn, &p, arvoreb);
+            return sem_promo;
+        }
+        else{
+            divide(chavepro, rrnpromo, &p, chavepromo, filho_d_pro, &novap, arvoreb);
+            escreve_pag(rrn, &p, arvoreb);
+            escreve_pag(*filho_d_pro, &novap, arvoreb);
+            return promo;
+        }
+    }
+}
+
+int insere_chave(int chave, int *rrn, FILE *arvoreb){
+    pagina raiz;
+    int chavepro, filho_d_pro, retorno;
+    retorno = insere(*rrn, chave, &chavepro, &filho_d_pro, arvoreb);
+    if(retorno == erro){
+        return erro;
+    }
+    else if(retorno == promo){
+        pagina raiznova;
+        inicia_pag(&raiznova);
+        raiznova.chaves[0] = chavepro;
+        raiznova.filhos[0] = *rrn;
+        raiznova.filhos[1] = filho_d_pro;
+        raiznova.qntchave = 1;
+        *rrn = rrn_novo(arvoreb);
+        escreve_pag(*rrn, &raiznova, arvoreb);
+    }
+    return insercao;
+}
+
+int le_chave(FILE *f, int *chave){
+    return fscanf(f, %d, chave);
+}
+
+void cria_arv(char *nome){
+    FILE *chave, *arvoreb;
+    int cont, i, chave;
+    char buffer[500];
+    cabecalho cab;
+    pagina raiz;
+    if((chaves = fopen(nome, "rb")) == NULL ){
+        printf("ERRO: arquivo dados.dat nao encontrado \n");
+    }
+    if((arvoreb = fopen("btree.dat", "w+b")) == NULL){
+        printf("ERRO: nao foi possivel criar o arquivo btree.dat \n");
+    }
+    cab.rrnraiz = 0;
+    fwrite(&cab, sizeof(cabecalho), 1, arvoreb);
+    inicia_pag(&raiz);
+    escreve_pag(cab.rrnraiz, &raiz, arvoreb);
+    while(le_chave(chaves, &chave) > 0){
+        if(insere_chave(chave, &(cab.rrnraiz), arvoreb) == erro){
+            printf("ERRO: chave %d ja existe no arquivo", chave);
+        }
+    }
+    fseek(arvoreb, 0, SEEK_SET);
+    fwrite(&cab, sizeof(cabecalho), 1, arvoreb);
+    fclose(chaves);
+    fclose(arvoreb);
+}
+
+// void imprime(FILE *arvoreb); fazer esse aqui nois memo;
+// int altura(FILE *arvoreb); fazer nois memo;
+// void estatisticas(FILE *arvoreb); fazer;
+// void relatorio(); fazer;
+
+
 // int main(int argc, char **argv) {
 
-//     if (argc < 3) {
+//     if (argc < 2) {
 //         fprintf(stderr, "Numero incorreto de argumentos!\n");
 //         fprintf(stderr, "Modo de uso:\n");
-//         fprintf(stderr, "$ %s (-c|-p) nome_arquivo\n", argv[0]);
+//         fprintf(stderr, "$ %s -c arquivo_chaves\n", argv[0]);
+//         fprintf(stderr, "$ %s -p\n", argv[0]);
 //         exit(1);
 //     }
 
