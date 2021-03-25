@@ -1,3 +1,5 @@
+from collections import deque
+
 class grafo:
     def __init__(self, v, adj):
         self.v = v
@@ -16,7 +18,7 @@ def enqueue(queue, s):
 
 # remove um vertice s da fila
 def dequeue(queue):
-    return queue.pop(0)
+    return queue.popleft()
 
 # verifica a distancia minima de um vertice s ate os vertices acessiveis a partir de s
 def bfs(G, s):
@@ -26,10 +28,10 @@ def bfs(G, s):
         v.pai = None 
     s.d = 0
     s.cor = 'cinza'
-    queue = []
+    queue = deque([])
     enqueue(queue, s)
     max = s
-    while queue != []:
+    while queue != deque([]):
         u = dequeue(queue)
         for v in G.adj[u.pos]:
             if v.cor == 'branco':
