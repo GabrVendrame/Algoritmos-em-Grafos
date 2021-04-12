@@ -55,6 +55,7 @@ def diameter(t):
     b = bfs(t, a)
     return b.d
 
+# gera uma arvore aleatoria com n vertices
 def random_tree_walk(n):
     g = grafo([], [])
     g.v = [vertice(i, -float('inf'), None, 'branco', False) for i in range(n)]
@@ -128,6 +129,7 @@ g.adj = [[g.v[6], g.v[3]],
         [g.v[1]]]
 assert diameter(g) == 6
 
+# procedimento dfs modificado que verifica se o a funcao random_tree_walk gerou uma arvore
 def dfs(g, n):
     global tempo
     for u in g.v:
@@ -138,7 +140,8 @@ def dfs(g, n):
         return True
     else:
         return False 
-    
+
+# funcao auxiliar para o dfs    
 def dfs_visit(g, u):
     global tempo
     tempo += 1
@@ -149,9 +152,11 @@ def dfs_visit(g, u):
             res = dfs_visit(g, v)
         elif v.cor == 'preto':
             return False
+    u.cor = 'preto'
     tempo += 1
     return res
 
+# escreve o resultado da funcao random_tree_walk em um arquivo
 def main():
     arquivo = open("random-walk.txt", "w")
     for n in range (250, 2001, 250):
