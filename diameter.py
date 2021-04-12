@@ -1,3 +1,4 @@
+# ALUNO: Gabriel de Souza Vendrame RA: 112681
 from collections import deque
 
 class grafo:
@@ -18,7 +19,8 @@ def enqueue(queue, s):
 
 # remove um vertice s da fila
 def dequeue(queue):
-    return queue.popleft()
+    return queue.popleft() # a funcao popleft, diferentemente da pop, tem tempo de execucao O(1)
+                           # entao o tempo de execucao original O(V + E) se mantem
 
 # verifica a distancia minima de um vertice s ate os vertices acessiveis a partir de s
 def bfs(G, s):
@@ -44,11 +46,25 @@ def bfs(G, s):
         u.cor = 'preto'        
     return max
        
+# calcula o diametro de uma arvore T, ou seja, o maior caminho em T
 def diameter(t):
     s = t.v[0]
     a = bfs(t, s)
     b = bfs(t, a)
     return b.d
+
+def rtw(n):
+    for v in G.V:
+        u.visitado = False
+    u = G.V random
+    u.visitado = True
+    while G.e < n-1:
+        v = g.v random
+        if v.visitado == False:
+            add(u, v)
+            v.visitado = True
+        u = v
+    return G
 
 g = grafo([], [])
 g.v = [vertice(i, -float('inf'), None, 'branco') for i in range(7)]
