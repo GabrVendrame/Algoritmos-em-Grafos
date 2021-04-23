@@ -11,11 +11,11 @@ class grafo:
 
 # construtor de vertice com posição, distancia, pai, cor e se foi visitado
 class vertice:
-    def __init__(self, pos, d, pai, cor, visitado):
-        self.cor = cor
-        self.pai = pai
-        self.d = d
+    def __init__(self, pos, d, p, cor, visitado):
         self.pos = pos
+        self.d = d
+        self.p = p
+        self.cor = cor
         self.visitado = visitado
 
 # construtor de um grafo com vertice, matriz de adjacencia e aresta
@@ -181,7 +181,7 @@ def main():
         tempoexec = time.time()
         for i in range(500):
             g = random_tree_kruskal(n)
-            assert dfs(g, n) == True
+            assert dfs(g, n) == True # teste dfs
             diametro = diameter(g)
             d = d + diametro
         d = d / 500
@@ -189,10 +189,11 @@ def main():
         print(n, time.time() - tempoexec)
     tempo_total = time.time() - tempo_inicial
     print("Tempo: {:.2f}".format(tempo_total), "segundos")
- 
+
 if __name__ == '__main__':
     main()
-    
+
+# teste diameter 
 g = grafo([], [])
 g.v = [vertice(i, -float('inf'), None, 'branco', False) for i in range(7)]
 g.adj = [[g.v[4], g.v[3]], 
@@ -204,6 +205,7 @@ g.adj = [[g.v[4], g.v[3]],
         [g.v[3], g.v[1]]]
 assert diameter(g) == 5
 
+# teste diameter
 g = grafo([], [])
 g.v = [vertice(i, -float('inf'), None, 'branco', False) for i in range(6)]
 g.adj = [[g.v[5]], 
@@ -214,6 +216,7 @@ g.adj = [[g.v[5]],
         [g.v[0], g.v[2]]] 
 assert diameter(g) == 5
 
+# teste diameter
 g = grafo([], [])
 g.v = [vertice(i, -float('inf'), None, 'branco', False) for i in range(5)]
 g.adj = [[g.v[2], g.v[4]], 
@@ -223,6 +226,7 @@ g.adj = [[g.v[2], g.v[4]],
         [g.v[0], g.v[3], g.v[1]]]
 assert diameter(g) == 3
 
+# teste diameter
 g = grafo([], [])
 g.v = [vertice(i, -float('inf'), None, 'branco', False) for i in range(10)]
 g.adj = [[g.v[1], g.v[2]], 
@@ -237,6 +241,7 @@ g.adj = [[g.v[1], g.v[2]],
         [g.v[4], g.v[6]]]
 assert diameter(g) == 9
 
+# teste diameter
 g = grafo([], [])
 g.v = [vertice(i, -float('inf'), None, 'branco', False) for i in range(8)]
 g.adj = [[g.v[6], g.v[3]], 
@@ -249,15 +254,52 @@ g.adj = [[g.v[6], g.v[3]],
         [g.v[1]]]
 assert diameter(g) == 6
 
-make_set(u)
-make_set(v)
-make_set(w)
-make_set(x)
-assert find_set(u) == u
+# teste make-set
+g = grafo([verticeC(i, -float('inf'), None, None) for i in range(4)], [])
+for i in range(4):
+    make_set(g.v[i])
+    assert g.v[i].p == g.v[i]
+    assert g.v[i].rank == 0
 
-assert u.p == u
-assert u.rank == 0
+# teste union
+g = grafo([verticeC(i, -float('inf'), None, None) for i in range(3)], [])
+make_set(g.v[0])
+make_set(g.v[1])
+make_set(g.v[2])
+union((g.v[0]), (g.v[1]))
+assert find_set(g.v[0]) == find_set(g.v[1])
+union((g.v[1]), (g.v[2]))
+assert find_set(g.v[1]) == find_set(g.v[2])
 
-assert link(u, v)
+# teste find set
+g = grafo([verticeC(i, -float('inf'), None, None) for i in range(5)], [])
+for i in range(5):
+    make_set(g.v[i])
+    assert find_set(g.v[i]) == g.v[i]
 
-assert union(u, v)
+# teste link
+g = grafo([verticeC(i, -float('inf'), None, None) for i in range(4)], [])
+make_set(g.v[0])
+make_set(g.v[1])
+make_set(g.v[2])
+make_set(g.v[3])
+link(find_set(g.v[0]), find_set(g.v[1]))
+link(find_set(g.v[1]), find_set(g.v[2]))
+link(find_set(g.v[2]), find_set(g.v[3]))
+assert find_set(g.v[0]) == find_set(g.v[1])
+assert find_set(g.v[1]) == find_set(g.v[2])
+assert find_set(g.v[2]) == find_set(g.v[3])
+
+# teste kruskal
+g = grafoC([verticeC(i, -float('inf'), None, None) for i in range(4)],
+    [[0,7,2,1], [7,0,11,1], [2,11,0,13], [1,1,13,0]],
+    [(0, 1, 7), (0, 2, 2), (0, 3, 1), (1, 2, 11), (1, 3, 1), (2, 3, 13)])
+g2 = mst_kruskal(g)
+assert g2.adj == [[g2.v[3], g2.v[2]], [g2.v[3]], [g2.v[0]], [g2.v[0], g2.v[1]]]
+
+# teste kruskal
+g = grafoC([verticeC(i, -float('inf'), None, None) for i in range(4)], 
+    [[0,2,14,3], [2,0,13,12], [14,13,0,9], [3,12,9,0]],
+    [(0, 1, 2), (0, 2, 14), (0, 3, 3), (1, 2, 13), (1, 3, 12), (2, 3, 9)])
+g2 = mst_kruskal(g)
+assert g2.adj == [[g2.v[1], g2.v[3]], [g2.v[0]], [g2.v[3]], [g2.v[0], g2.v[2]]]
