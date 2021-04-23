@@ -69,7 +69,7 @@ def diameter(t):
     b = bfs(t, a)
     return b.d
 
-# gera uma arvore aleatoria com n vertices
+# gera uma arvore aleatoria com n vertices a partir de um grafo
 def random_tree_walk(n):
     g = grafo([], [])
     g.v = [vertice(i, -float('inf'), None, 'branco', False) for i in range(n)]
@@ -102,7 +102,7 @@ def dfs_visit(g, u):
     tempo += 1
     return res
 
-# procedimento dfs modificado que verifica se o a funcao random_tree_walk gerou uma arvore
+# procedimento dfs modificado para verificar se o a funcao random_tree_walk gera uma arvore
 def dfs(g, n):
     global tempo
     for u in g.v:
@@ -114,12 +114,12 @@ def dfs(g, n):
     else:
         return False
 
-#
+# cria um conjunto de apenas um elemento, que é u
 def make_set(u):
     u.p = u
     u.rank = 0
 
-#
+# acha um caminho
 def find_set(u):
     if u != u.p:
         u.p = find_set(u.p)
@@ -138,21 +138,31 @@ def link(u, v):
 def union(u, v):
     link(find_set(u), find_set(v))
 
-# funcao auxiliar para o random-tree-kruskal
+# funcao auxiliar para o random-tree-kruskal, apos a execucao retorna uma arvore geradora minima do grafo
 def mst_kruskal(g):
+    i, cont = 0, 0
+    
     n =  len(g.v)
     A = grafo([vertice(i, -float('inf'), None, 'branco', False) for i in range(n)], [[] for i in range(n)])
     for v in g.v:
         make_set(v)
     g.aresta.sort(key=lambda lista : lista[2])
-    for [u, v, peso] in g.aresta:
+    # for [u, v, peso] in g.aresta:
+    #     if find_set(g.v[u]) != find_set(g.v[v]):
+    #         A.adj[u].append(A.v[v])
+    #         A.adj[v].append(A.v[u])
+    #         union(g.v[u], g.v[v])
+    while cont < n-1:
+        u, v, peso = g.aresta[i]
+        i += 1
         if find_set(g.v[u]) != find_set(g.v[v]):
             A.adj[u].append(A.v[v])
             A.adj[v].append(A.v[u])
             union(g.v[u], g.v[v])
+            cont += 1
     return A
 
-# assim como o random-tree-walk, gera uma arvore aleatoria de n vertices
+# gera uma arvore aleatoria de n vertices a partir de um grafo completo
 def random_tree_kruskal(n):
     g = grafoC([], [], [])
     g.v = [verticeC(i, -float('inf'), None, 0) for i in range(n)]
@@ -183,12 +193,12 @@ def main():
     tempo_inicial = time.time()
     for n in range (250, 2001, 250):
         d = 0
-        for i in range(10):
+        for i in range(500):
             g = random_tree_kruskal(n)
             assert dfs(g, n) == True
-            diameter(g)
-            d = d + diameter(g)
-        d = d / 10
+            diametro = diameter(g)
+            d = d + diametro
+        d = d / 500
         arquivo.write("{} {}\n".format(n, d))
     tempo_total = time.time() - tempo_inicial
     print("Tempo: {:.2f}".format(tempo_total), "segundos")
