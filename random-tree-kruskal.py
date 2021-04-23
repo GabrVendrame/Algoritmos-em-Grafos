@@ -186,7 +186,8 @@ def main():
             d = d + diametro
         d = d / 500
         arquivo.write("{} {}\n".format(n, d))
-        print(n, time.time() - tempoexec)
+        tempo_atual = time.time() - tempoexec
+        print("n:", n, "->tempo: {:.2f}".format(tempo_atual),"segundos") 
     tempo_total = time.time() - tempo_inicial
     print("Tempo: {:.2f}".format(tempo_total), "segundos")
 
