@@ -27,11 +27,12 @@ class grafoC:
 
 # construtor de vertice com posicao, distancia, pai e rank
 class verticeC:
-    def __init__(self, pos, d, p, rank):
+    def __init__(self, pos, d, p, rank, chave):
         self.pos = pos
         self.d = d
         self.p = p
         self.rank = rank
+        self.chave = chave
 
 # insere um vertice s na fila
 def enqueue(queue, s):
@@ -47,7 +48,7 @@ def bfs(G, s):
     for v in G.v:
         v.cor = 'branco'
         v.d = 0
-        v.pai = None 
+        v.p = None 
     s.d = 0
     s.cor = 'cinza'
     queue = deque([])
@@ -59,7 +60,7 @@ def bfs(G, s):
             if v.cor == 'branco':
                 v.cor = 'cinza'
                 v.d = u.d + 1
-                v.pai = u
+                v.p = u
                 if v.d > max.d:
                     max = v
                 enqueue(queue, v)
@@ -163,7 +164,7 @@ def mst_kruskal(g):
 # gera uma arvore aleatoria de n vertices a partir de um grafo completo
 def random_tree_kruskal(n):
     g = grafoC([], [], [])
-    g.v = [verticeC(i, -float('inf'), None, 0) for i in range(n)]
+    g.v = [verticeC(i, -float('inf'), None, 0, float('inf')) for i in range(n)]
     g.adj = [[0 for i in range(n)] for i in range(n)]
     for i in range(n):
         for j in range(i+1, n):
@@ -172,8 +173,91 @@ def random_tree_kruskal(n):
             g.aresta.append([i, j, peso])
     return mst_kruskal(g)
 
+# remove o vertice com a menor chave da fila de prioridades
+def extract_min(Q):
+    menor = Q[0]
+    for i in Q:
+        if menor.chave > i.chave:
+            menor = i
+    Q.remove(menor)
+    return menor
+
+# funcao auxiliar para o random-tree-prim, retorna uma arvore geradora minima
+def mst_prim(g, s):
+    A = grafo([vertice(i, -float('inf'), None, 'branco', False) for i in range(len(g.v))], [[] for i in range(len(g.v))])
+    for u in g.v:
+        u.chave = float('inf')
+        u.p = None
+    s.chave = 0
+    Q = []
+    for i in g.v:
+        Q.append(i)
+    while len(Q) != 0:
+        u = extract_min(Q)
+        for v in Q:
+            if g.v[v.pos].chave > g.adj[u.pos][v.pos]:
+                g.v[v.pos].chave = g.adj[u.pos][v.pos]
+                g.v[v.pos].p = u
+    for u in g.v:
+        if u.p != None:
+            A.adj[u.p.pos].append(A.v[u.pos])
+            A.adj[u.pos].append(A.v[u.p.pos])
+    return A
+
+# gera uma arvore aleatoria de n vertices a partir de um grafo completo
+def random_tree_prim(n):
+    g = grafoC([], [], [])
+    g.v = [verticeC(i, -float('inf'), None, 0, float('inf')) for i in range(n)]
+    g.adj = [[0 for i in range(n)] for i in range(n)]
+    for i in range(n):
+        for j in range(i+1, n):
+            peso = random.random()
+            g.adj[i][j] = peso
+            g.aresta.append([i, j, peso])
+    s = g.v[0]
+    return mst_prim(g, s)
+
 # escreve o resultado da funcao random_tree_walk em um arquivo
 def main():
+    # MAIN PARA O RANDOM-TREE-WALK
+    # arquivo = open("random-tree-walk.txt", "w")
+    # tempo_inicial = time.time()
+    # for n in range (250, 2001, 250):
+    #     d = 0
+    #     tempoexec = time.time()
+    #     for i in range(500):
+    #         g = random_tree_walk(n)
+    #         assert dfs(g, n) == True # teste dfs
+    #         diametro = diameter(g)
+    #         d = d + diametro
+    #     d = d / 500
+    #     arquivo.write("{} {}\n".format(n, d))
+    #     tempo_atual = time.time() - tempoexec
+    #     print("n:", n, "->tempo: {:.2f}".format(tempo_atual),"segundos")
+    # MAIN PARA O RANDOM-TREE-WALK
+    #
+    # MAIN PARA O RANDOM-TREE-KRUSKAL
+    # tempo_total = time.time() - tempo_inicial
+    # print("Tempo: {:.2f}".format(tempo_total), "segundos")
+    # arquivo = open("random-tree-kruskal.txt", "w")
+    # tempo_inicial = time.time()
+    # for n in range (250, 2001, 250):
+    #     d = 0
+    #     tempoexec = time.time()
+    #     for i in range(500):
+    #         g = random_tree_kruskal(n)
+    #         assert dfs(g, n) == True # teste dfs
+    #         diametro = diameter(g)
+    #         d = d + diametro
+    #     d = d / 500
+    #     arquivo.write("{} {}\n".format(n, d))
+    #     tempo_atual = time.time() - tempoexec
+    #     print("n:", n, "->tempo: {:.2f}".format(tempo_atual),"segundos") 
+    # tempo_total = time.time() - tempo_inicial
+    # print("Tempo: {:.2f}".format(tempo_total), "segundos")
+    # MAIN PARA O RANDOM-TREE-KRUSKAL
+    #
+    # MAIN PARA O RANDOM-TREE-PRIM
     arquivo = open("random-tree-kruskal.txt", "w")
     tempo_inicial = time.time()
     for n in range (250, 2001, 250):
@@ -190,6 +274,7 @@ def main():
         print("n:", n, "->tempo: {:.2f}".format(tempo_atual),"segundos") 
     tempo_total = time.time() - tempo_inicial
     print("Tempo: {:.2f}".format(tempo_total), "segundos")
+    # MAIN PARA O RANDOM-TREE-PRIM
 
 if __name__ == '__main__':
     main()
@@ -256,14 +341,14 @@ g.adj = [[g.v[6], g.v[3]],
 assert diameter(g) == 6
 
 # teste make-set
-g = grafo([verticeC(i, -float('inf'), None, None) for i in range(4)], [])
+g = grafo([verticeC(i, -float('inf'), None, 0, 0) for i in range(4)], [])
 for i in range(4):
     make_set(g.v[i])
     assert g.v[i].p == g.v[i]
     assert g.v[i].rank == 0
 
 # teste union
-g = grafo([verticeC(i, -float('inf'), None, None) for i in range(3)], [])
+g = grafo([verticeC(i, -float('inf'), None, 0, 0) for i in range(3)], [])
 make_set(g.v[0])
 make_set(g.v[1])
 make_set(g.v[2])
@@ -273,13 +358,13 @@ union((g.v[1]), (g.v[2]))
 assert find_set(g.v[1]) == find_set(g.v[2])
 
 # teste find set
-g = grafo([verticeC(i, -float('inf'), None, None) for i in range(5)], [])
+g = grafo([verticeC(i, -float('inf'), None, 0, 0) for i in range(5)], [])
 for i in range(5):
     make_set(g.v[i])
     assert find_set(g.v[i]) == g.v[i]
 
 # teste link
-g = grafo([verticeC(i, -float('inf'), None, None) for i in range(4)], [])
+g = grafo([verticeC(i, -float('inf'), None, 0, 0) for i in range(4)], [])
 make_set(g.v[0])
 make_set(g.v[1])
 make_set(g.v[2])
@@ -292,14 +377,14 @@ assert find_set(g.v[1]) == find_set(g.v[2])
 assert find_set(g.v[2]) == find_set(g.v[3])
 
 # teste kruskal
-g = grafoC([verticeC(i, -float('inf'), None, None) for i in range(4)],
+g = grafoC([verticeC(i, -float('inf'), None, 0, 0) for i in range(4)],
     [[0,7,2,1], [7,0,11,1], [2,11,0,13], [1,1,13,0]],
     [(0, 1, 7), (0, 2, 2), (0, 3, 1), (1, 2, 11), (1, 3, 1), (2, 3, 13)])
 g2 = mst_kruskal(g)
 assert g2.adj == [[g2.v[3], g2.v[2]], [g2.v[3]], [g2.v[0]], [g2.v[0], g2.v[1]]]
 
 # teste kruskal
-g = grafoC([verticeC(i, -float('inf'), None, None) for i in range(4)], 
+g = grafoC([verticeC(i, -float('inf'), None, 0, 0) for i in range(4)], 
     [[0,2,14,3], [2,0,13,12], [14,13,0,9], [3,12,9,0]],
     [(0, 1, 2), (0, 2, 14), (0, 3, 3), (1, 2, 13), (1, 3, 12), (2, 3, 9)])
 g2 = mst_kruskal(g)
