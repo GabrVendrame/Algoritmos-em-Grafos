@@ -32,6 +32,7 @@ class verticeC:
         self.d = d
         self.p = p
         self.rank = rank
+        self.chave = chave
 
 # insere um vertice s na fila
 def enqueue(queue, s):
@@ -172,18 +173,34 @@ def random_tree_kruskal(n):
             g.aresta.append([i, j, peso])
     return mst_kruskal(g)
 
-def mst_prim(g, w, s):
+def extract_min(Q):
+    menor = Q[0]
+    for i in Q:
+        if menor.chave > i.chave:
+            menor = i
+    Q.remove(menor)
+    return menor
+
+def mst_prim(g, s):
     for u in g.v:
         u.chave = 0
         u.pai = None
     s.chave = 0
-    Q = g.v
-    while Q != []:
+    Q = []
+    for i in g.v:
+        Q.append(i)
+    while len(Q) != 0:
         u = extract_min(Q)
-        for v in g.adj[u]:
-            if v in Q and peso(u, v) < v.chave:
-                v.pai = u
-                v.chave = peso(u, v)
+        for v in Q:
+            if g.v[v.pos].chave > g.adj[u.pos][v.pos]:
+                g.v[v.pos].chave = g.adj[u.pos][v.pos]
+                g.v[v.pos].pai = u
+    lista = [[] for i in range(len(g.v))]
+    for u in g.v:
+        if u.pai != None:
+            lista[u.pai.pos].append(u.pos)
+            lista[u.pos].append(u.pai.pos)
+    return lista
 
 def random_tree_prim(n):
     g = grafoC([], [], [])
@@ -192,22 +209,24 @@ def random_tree_prim(n):
     for i in range(n):
         for j in range(i+1, n):
             peso = random.random()
+            g.adj[i][j] = peso
+            g.aresta.append([i, j, peso])
     s = g.v[0]
-    return mst_prim(g, w, s)
+    return mst_prim(g, s)
 
 # escreve o resultado da funcao random_tree_walk em um arquivo
 def main():
-    arquivo = open("random-tree-kruskal.txt", "w")
+    arquivo = open("random-tree-prim.txt", "w")
     tempo_inicial = time.time()
     for n in range (250, 2001, 250):
         d = 0
         tempoexec = time.time()
-        for i in range(500):
-            g = random_tree_kruskal(n)
+        for i in range(10):
+            g = random_tree_prim(n)
             assert dfs(g, n) == True
             diametro = diameter(g)
             d = d + diametro
-            d = d / 500
+            d = d / 10
             arquivo.write("{} {}\n".format(n, d))
             print(n, time.time() - tempoexec)
         tempo_total = time.time() - tempo_inicial
